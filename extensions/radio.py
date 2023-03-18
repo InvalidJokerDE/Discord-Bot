@@ -18,6 +18,7 @@ class Radio(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        await self.bot.wait_until_ready()
         channel = self.bot.get_channel(CHANNEL)
 
         await channel.connect()
@@ -41,12 +42,15 @@ class Radio(commands.Cog):
         channel = self.bot.get_channel(CHANNEL)
         
         if channel.guild.voice_client:
-            self.check_music.stop()
+            if self.check_music.is_running():
+                self.check_music.stop()
+            
             await channel.guild.voice_client.disconnect()
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
             await channel.connect()
             channel.guild.voice_client.play(discord.FFmpegPCMAudio("https://streams.ilovemusic.de/iloveradio16.mp3"))
-            self.check_music.start()
+            if self.check_music.is_running() == False:
+                self.check_music.start()
 
 
 def setup(bot):
